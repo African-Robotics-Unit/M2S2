@@ -1,0 +1,7 @@
+SoundRequest sound_request
+---
+bool playing
+builtin_interfaces/Duration stamp
+---
+bool playing
+builtin_interfaces/Duration stamp
