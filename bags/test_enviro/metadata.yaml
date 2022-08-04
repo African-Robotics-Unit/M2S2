@@ -4,16 +4,16 @@ rosbag2_bagfile_information:
   relative_file_paths:
     - test_enviro_0.db3
   duration:
-    nanoseconds: 3999567414
+    nanoseconds: 30999511945
   starting_time:
-    nanoseconds_since_epoch: 1659613137480701665
-  message_count: 5
+    nanoseconds_since_epoch: 1659613510313289772
+  message_count: 32
   topics_with_message_count:
     - topic_metadata:
         name: /enviro_data
         type: m2s2_custom_interfaces/msg/EnviroData
         serialization_format: cdr
         offered_qos_profiles: "- history: 3\n  depth: 0\n  reliability: 1\n  durability: 2\n  deadline:\n    sec: 2147483647\n    nsec: 4294967295\n  lifespan:\n    sec: 2147483647\n    nsec: 4294967295\n  liveliness: 1\n  liveliness_lease_duration:\n    sec: 2147483647\n    nsec: 4294967295\n  avoid_ros_namespace_conventions: false"
-      message_count: 5
+      message_count: 32
   compression_format: ""
   compression_mode: ""
