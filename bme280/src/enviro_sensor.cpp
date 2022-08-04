@@ -55,6 +55,9 @@ private:
 		data_.temperature = comp_data.temperature;
 		data_.pressure = 0.01f * comp_data.pressure;
 		data_.humidity = comp_data.humidity;
+
+		//add timestamp 
+		data_.header.stamp = now();
 		
 		publisher_->publish(data_);
 	}
@@ -67,3 +70,6 @@ int main(int argc, char **argv){
 	rclcpp::shutdown();
 	return 0;
 }
+
+//TO DO:
+//create post processing subscriber to sqllite db

@@ -26,10 +26,14 @@ target_include_directories(bme280 PUBLIC src/driver/)
 add_executable(enviro_node src/enviro_sensor.cpp)
 ament_target_dependencies(enviro_node rclcpp m2s2_custom_interfaces)
 
+add_executable(enviro_subscriber_node src/enviro_subscriber.cpp)
+ament_target_dependencies(enviro_subscriber_node rclcpp m2s2_custom_interfaces)
+
 target_link_libraries(enviro_node bme280)
 
 install(TARGETS
 	enviro_node
+  enviro_subscriber_node
 	DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
