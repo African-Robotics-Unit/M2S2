@@ -10,7 +10,7 @@
 
 namespace audio_transport
 {
-  class RosGstCapture: public rclcpp::Node
+  class RosGstCapture: public rclcpp::Node 
   {
     public:
       RosGstCapture()
@@ -63,8 +63,10 @@ namespace audio_transport
         g_object_unref(_bus);
 
         // We create the sink first, just for convenience
+        
+        
         if (dst_type == "appsink")
-        {
+        {  //publish msg on /audio/audio topic   
           _sink = gst_element_factory_make("appsink", "sink");
           g_object_set(G_OBJECT(_sink), "emit-signals", true, NULL);
           g_object_set(G_OBJECT(_sink), "max-buffers", 100, NULL);
@@ -72,10 +74,13 @@ namespace audio_transport
                             G_CALLBACK(onNewBuffer), this);
         }
         else
-        {
+        { 
+          //writes audio to file - can't run both at the same time 
           RCLCPP_INFO_STREAM(this->get_logger(), "file sink to " << dst_type.c_str());
           _sink = gst_element_factory_make("filesink", "sink");
           g_object_set( G_OBJECT(_sink), "location", dst_type.c_str(), NULL);
+
+
         }
 
         _source = gst_element_factory_make("alsasrc", "source");
@@ -121,6 +126,7 @@ namespace audio_transport
 
           gst_bin_add_many( GST_BIN(_pipeline), _source, _filter, _convert, _encode, _sink, NULL);
           link_ok = gst_element_link_many(_source, _filter, _convert, _encode, _sink, NULL);
+
         } else if (_format == "wave") {
           if (dst_type == "appsink") {
             g_object_set( G_OBJECT(_sink), "caps", caps, NULL);
@@ -132,21 +138,11 @@ namespace audio_transport
             gst_bin_add_many( GST_BIN(_pipeline), _source, _filter, _sink, NULL);
             link_ok = gst_element_link_many( _source, _filter, _sink, NULL);
           }
+
         } else {
           RCLCPP_ERROR_STREAM(this->get_logger(), "format must be \"wave\" or \"mp3\"");
           exitOnMainThread(1);
         }
-        /*}
-        else
-        {
-          _sleep_time = 10000;
-          _source = gst_element_factory_make("filesrc", "source");
-          g_object_set(G_OBJECT(_source), "location", source_type.c_str(), NULL);
-
-          gst_bin_add_many( GST_BIN(_pipeline), _source, _sink, NULL);
-          gst_element_link_many(_source, _sink, NULL);
-        }
-        */
 
         if (!link_ok) {
           RCLCPP_ERROR_STREAM(this->get_logger(), "Unsupported media type.");
@@ -163,7 +159,9 @@ namespace audio_transport
         info_msg.sample_format = _sample_format;
         info_msg.bitrate = _bitrate;
         info_msg.coding_format = _format;
+        //info_msg.header.stamp = now();
         _pub_info->publish(info_msg);
+
       }
 
       ~RosGstCapture()
@@ -179,8 +177,9 @@ namespace audio_transport
         exit(code);
       }
 
-      void publish( const audio_common_msgs::msg::AudioData &msg )
+      void publish(audio_common_msgs::msg::AudioData &msg )
       {
+        msg.header.stamp = now();
         _pub->publish(msg);
       }
 
@@ -197,6 +196,8 @@ namespace audio_transport
         audio_common_msgs::msg::AudioData msg;
         gst_buffer_map(buffer, &map, GST_MAP_READ);
         msg.data.resize( map.size );
+
+        //msg.header.stamp = now();
 
         memcpy( &msg.data[0], map.data, map.size );
 
@@ -223,6 +224,8 @@ namespace audio_transport
         return FALSE;
       }
 
+
+
     private:
       rclcpp::Publisher<audio_common_msgs::msg::AudioData>::SharedPtr _pub;
       rclcpp::Publisher<audio_common_msgs::msg::AudioInfo>::SharedPtr _pub_info;
@@ -234,6 +237,7 @@ namespace audio_transport
       int _bitrate, _channels, _depth, _sample_rate;
       GMainLoop *_loop;
       std::string _format, _sample_format;
+
   };
 }
 

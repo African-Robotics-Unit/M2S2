@@ -1,7 +1,7 @@
 <launch>
   <arg name="device" default=""/>
   <arg name="ns" default="audio"/>
-  <arg name="dst" default="alsasink"/>
+  <arg name="dst" default="./output_5.mp3"/>
   <arg name="do_timestamp" default="false"/>
   <arg name="format" default="mp3"/>
   <arg name="channels" default="1"/>

@@ -1,4 +1,5 @@
 # This message contains the audio meta data
+std_msgs/Header header
 
 # Number of channels
 uint8 channels

@@ -24,4 +24,7 @@
     </node>
   </group>
 
+  <executable cmd="ros2 bag record /audio/audio -o bags/test_audio" output="screen" />
+
+
 </launch>
