@@ -478,7 +478,41 @@ void XimeaROSCam::openCam() {
     // // For high frame rate performance
     // src: https://www.ximea.com/support/wiki/usb3/...
     //      ...How_to_optimize_software_performance_on_high_frame_rates
+    
+    // set maximum number of queue
+    int number_of_field_buffers = 0;
+    xiGetParamInt(this->xi_h_, XI_PRM_BUFFERS_QUEUE_SIZE XI_PRM_INFO_MAX, &number_of_field_buffers);
+    xiSetParamInt(this->xi_h_, XI_PRM_BUFFERS_QUEUE_SIZE, number_of_field_buffers);
+    
+    int payload=0;
+    xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_IMAGE_PAYLOAD_SIZE, &payload);
+    
+    // ---------------------------------------------------
+// select transport buffer size depending on payload
 
+   int transport_buffer_size_default = 0;
+   int transport_buffer_size_increment = 0;
+   int transport_buffer_size_minimum = 0;
+    
+   xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE, &transport_buffer_size_default);
+   xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE XI_PRM_INFO_INCREMENT, &transport_buffer_size_increment);
+   xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE XI_PRM_INFO_MIN, &transport_buffer_size_minimum);
+   
+   if(payload < transport_buffer_size_default + transport_buffer_size_increment){
+   	
+   	int transport_buffer_size = payload;
+   	if (transport_buffer_size_increment){
+   		int remainder = transport_buffer_size % transport_buffer_size_increment;
+   		if (remainder)
+   			transport_buffer_size += transport_buffer_size_increment - remainder;
+   	}
+   	if (transport_buffer_size < transport_buffer_size_minimum)
+   		transport_buffer_size = transport_buffer_size_minimum;
+   	xi_stat = xiSetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE, transport_buffer_size);
+   	
+   	
+   }
+	
     //      -- Start camera acquisition --
     RCLCPP_INFO(this->get_logger(),  "Starting Acquisition...");
     xi_stat = xiStartAcquisition(this->xi_h_);

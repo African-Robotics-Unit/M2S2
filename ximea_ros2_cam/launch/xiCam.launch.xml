@@ -13,4 +13,7 @@
             <param from="$(find-pkg-share ximea_ros2_cam)/config/xiCam_config.yaml"/>
         </node>
     </group>
+
+    <executable cmd="ros2 bag record /image_raw -o bags/test_ximea" output="screen" />
+
 </launch>

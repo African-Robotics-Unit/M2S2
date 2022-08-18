@@ -7,7 +7,7 @@
   <arg name="channels" default="1"/>
   <arg name="sample_rate" default="16000"/>
   <arg name="dst" default="appsink"/>
-  <arg name="format" default="mp3"/>
+  <arg name="format" default="wave"/>
   <arg name="sample_format" default="S16LE"/>
   <arg name="ns" default="audio"/>
 
