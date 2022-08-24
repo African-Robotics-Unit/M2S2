@@ -6,3 +6,5 @@
 COLCON_IGNORE
 AMENT_IGNORE
 
+
+.vscode/sftp.json
