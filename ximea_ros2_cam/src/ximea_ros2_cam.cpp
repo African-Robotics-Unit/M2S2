@@ -429,12 +429,12 @@ void XimeaROSCam::openCam() {
     }
 
     // Set bandwidth limit for camera and apply a safety ratio
-    RCLCPP_INFO_STREAM(this->get_logger(),  "Limiting bandwidth to: " <<
-            (int)((float)avail_bw*this->cam_bw_safetyratio_) << " Mbits/sec");
     xi_stat = xiSetParamInt(this->xi_h_,
                             XI_PRM_LIMIT_BANDWIDTH,
                             (int)((float)avail_bw*this->cam_bw_safetyratio_));
-    xi_stat = xiSetParamInt(this->xi_h_, XI_PRM_LIMIT_BANDWIDTH_MODE , XI_ON);
+    xi_stat = xiSetParamInt(this->xi_h_, XI_PRM_LIMIT_BANDWIDTH_MODE, XI_ON);
+    RCLCPP_INFO_STREAM(this->get_logger(),  "Limiting bandwidth to: " <<
+            (int)((float)avail_bw*this->cam_bw_safetyratio_) << " Mbits/sec");
 
 
     //      -- Framerate control  --
@@ -461,6 +461,7 @@ void XimeaROSCam::openCam() {
                                       this->cam_framerate_set_);
         } else {
             // default to free run
+            RCLCPP_INFO_STREAM(this->get_logger(),  "Setting frame rate control to: FREE RUN (default)");
             xi_stat = xiSetParamInt(this->xi_h_,
                                     XI_PRM_ACQ_TIMING_MODE,
                                     XI_ACQ_TIMING_MODE_FREE_RUN);
@@ -566,7 +567,7 @@ void XimeaROSCam::frameCaptureCb() {
                              &xi_img);
 
         // Add timestamp
-        timestamp = now();
+        timestamp = rclcpp::Node::now();
 
         // Was the image retrieval successful?
         if (xi_stat == XI_OK) {
@@ -578,12 +579,14 @@ void XimeaROSCam::frameCaptureCb() {
                 << " x "
                 << xi_img.height << ".");
 
+            // get camera information
+            sensor_msgs::msg::CameraInfo cam_info = this->cam_info_manager_->getCameraInfo();
+
             // Setup image
             img_buffer = reinterpret_cast<char *>(xi_img.bp);
 
-            // Publish as ROS message
-            sensor_msgs::msg::Image img;
             // Populate ROS message
+            sensor_msgs::msg::Image img;
             sensor_msgs::fillImage(img,
                                     this->cam_encoding_,
                                     xi_img.height,
@@ -594,9 +597,6 @@ void XimeaROSCam::frameCaptureCb() {
             img.header.stamp = timestamp;
 
             //Publish image
-            sensor_msgs::msg::CameraInfo cam_info =
-                    this->cam_info_manager_->getCameraInfo();
-
             this->cam_pub_.publish(img, cam_info);
         }
     }
