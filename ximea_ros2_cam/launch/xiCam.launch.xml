@@ -1,7 +1,7 @@
 <launch>
     <group>
         <node pkg="ximea_ros2_cam" name="ximea_cam_node" exec="ximea_ros2_cam_node" output="screen">
-            <param name="serial_no" value="'29970251'" />
+            <param name="serial_no" value="'29970951'" />
             <param name="cam_name" value="ximea_cam" />
             <param name="calib_file" value=""/>
             <param name="frame_id" value="'0'"/>
