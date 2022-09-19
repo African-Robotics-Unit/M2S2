@@ -1,4 +1,4 @@
-#include "ximea_ros2_cam/ximea_ros2_cam.hpp"
+#include "ximea_ros2_cam/ximea_ros2_cam_dev.hpp"
 
 using namespace cv;
 namespace ximea_ros2_cam {
@@ -50,6 +50,7 @@ XimeaROSCam::XimeaROSCam() :
     
     this->initCam();
     this->initPubs();
+    this->openDeviceCb();
     this->initTimers();
 
     RCLCPP_INFO(this->get_logger(), "Node initialized..");
@@ -84,6 +85,8 @@ void XimeaROSCam::initPubs() {
 
     this->cam_img_counter_pub_ = this->create_publisher<std_msgs::msg::UInt32>(
             "image_count", 10);
+    
+    this->cam_pub_ = this->create_publisher<sensor_msgs::msg::Image>("image_raw", 10);
             
     // Report end of function
     RCLCPP_INFO(this->get_logger(), "... Publishers Loaded. ");
@@ -96,11 +99,11 @@ void XimeaROSCam::initTimers() {
 
     // Load camera polling callback timer ((Ensure that with multiple cameras,
     // each time is about 2 seconds spaced apart)
-    this->xi_open_device_cb_ =
-        this->create_wall_timer(std::chrono::duration<float>(this->poll_time_),
-        std::bind(&XimeaROSCam::openDeviceCb, this));
+    // this->xi_open_device_cb_ =
+    //     this->create_wall_timer(std::chrono::duration<float>(this->poll_time_),
+    //     std::bind(&XimeaROSCam::openDeviceCb, this));
 
-    RCLCPP_INFO_STREAM(this->get_logger(), "xi_open_device_cb_: " << this->xi_open_device_cb_);
+    //RCLCPP_INFO_STREAM(this->get_logger(), "xi_open_device_cb_: " << this->xi_open_device_cb_);
 
     // Load camera frame capture callback timer
     this->t_frame_cb_ =
@@ -250,11 +253,6 @@ void XimeaROSCam::initCam() {
     this->is_active_ = false;
     this->xi_h_ = NULL;
 
-    // Setup image transport (camera publisher) and camera info topics
-    this->cam_pub_ = image_transport::create_camera_publisher(this, "image_raw");
-    //create publisher for resized image 
-    this->image_resized_pub_ = image_transport::create_camera_publisher(this, "image_resized_raw");
-
     // only load and publish calib file if it isn't empty
     // assume camera info is not loaded
     // Setup camera info manager for calibration
@@ -291,19 +289,7 @@ void XimeaROSCam::openCam() {
                             XI_PRM_IMAGE_DATA_FORMAT,
                             this->cam_format_int_);
 
-    // //      -- Set auto white balance if requested --
-    // if (this->cam_auto_white_balance_) {
-    //     xi_stat = xiSetParamInt(this->xi_h_, XI_PRM_AUTO_WB, 1);
-    // } else {
-    //     xi_stat = xiSetParamInt(this->xi_h_, XI_PRM_AUTO_WB, 0);
-    // }
-
     //      -- White balance mode --
-    // Note: Setting XI_PRM_MANUAL right before or after setting coeffs
-    // actually overrides the coefficients! This is because calculating
-    // the manual coeffs takes time, so when the coefficients are set,
-    // they will be overwritten once the manual coeff values are calculated.
-    // This also is the same when XI_PRM_MANUAL is set to 0 as well.
     if (this->cam_white_balance_mode_ == 2) {
         RCLCPP_INFO_STREAM(this->get_logger(),  "WHITE BALANCE MODE SET TO AUTO.");
         xi_stat = xiSetParamInt(this->xi_h_, XI_PRM_AUTO_WB, 1);
@@ -470,18 +456,6 @@ void XimeaROSCam::openCam() {
         }
     }
 
-    //      -- Optimize transport buffer commit/size based on payload  --
-    // // For usb controllers that can handle it...
-    // src: https://www.ximea.com/support/wiki/apis/Linux_USB30_Support
-    // xiSetParamInt(handle, XI_PRM_ACQ_TRANSPORT_BUFFER_COMMIT, 32);
-    // xiGetParamInt( handle, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE XI_PRM_INFO_MAX,
-    //  &buffer_size);
-    // xiSetParamInt(handle, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE, buffer_size);
-
-    // // For high frame rate performance
-    // src: https://www.ximea.com/support/wiki/usb3/...
-    //      ...How_to_optimize_software_performance_on_high_frame_rates
-    
     // set maximum number of queue
     int number_of_field_buffers = 0;
     xiGetParamInt(this->xi_h_, XI_PRM_BUFFERS_QUEUE_SIZE XI_PRM_INFO_MAX, &number_of_field_buffers);
@@ -491,15 +465,15 @@ void XimeaROSCam::openCam() {
     xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_IMAGE_PAYLOAD_SIZE, &payload);
     
     // ---------------------------------------------------
-//select transport buffer size depending on payload 
+    //select transport buffer size depending on payload 
 
-   int transport_buffer_size_default = 0;
-   int transport_buffer_size_increment = 0;
-   int transport_buffer_size_minimum = 0;
+    int transport_buffer_size_default = 0;
+    int transport_buffer_size_increment = 0;
+    int transport_buffer_size_minimum = 0;
     
-   xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE, &transport_buffer_size_default);
-   xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE XI_PRM_INFO_INCREMENT, &transport_buffer_size_increment);
-   xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE XI_PRM_INFO_MIN, &transport_buffer_size_minimum);
+    xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE, &transport_buffer_size_default);
+    xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE XI_PRM_INFO_INCREMENT, &transport_buffer_size_increment);
+    xi_stat = xiGetParamInt(this->xi_h_, XI_PRM_ACQ_TRANSPORT_BUFFER_SIZE XI_PRM_INFO_MIN, &transport_buffer_size_minimum);
    
    if(payload < transport_buffer_size_default + transport_buffer_size_increment){
    	
@@ -548,12 +522,14 @@ void XimeaROSCam::openDeviceCb() {
 }
 
 // Start aquiring data
+
+
 void XimeaROSCam::frameCaptureCb() {
 
     // Init variables
     XI_RETURN xi_stat;
     XI_IMG xi_img;
-    char *img_buffer;
+    //char *img_buffer;
     rclcpp::Time timestamp;
     std::string time_str;
 
@@ -573,30 +549,9 @@ void XimeaROSCam::frameCaptureCb() {
 
         // Was the image retrieval successful?
         if (xi_stat == XI_OK) {
-            
-            /**
-            auto msg = std_msgs::msg::UInt32();
-            msg.data = ++this->img_count_;
-            this->cam_img_counter_pub_->publish(msg);
-            RCLCPP_INFO_STREAM(this->get_logger(), "Successfully captured image: " << this->img_count_);
-            */
-        /**
-            RCLCPP_INFO_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 3,
-                "Capturing image from Ximea camera serial no: "
-                << this->cam_serialno_
-                << ". WxH: "
-                << xi_img.width
-                << " x "
-                << xi_img.height << ".");
-        */
 
-            // Setup image
-            img_buffer = reinterpret_cast<char *>(xi_img.bp);
-
-            // Publish as ROS message
-            /**
             sensor_msgs::msg::Image img;
-            // Populate ROS message
+            img_buffer = reinterpret_cast<char *>(xi_img.bp);
             sensor_msgs::fillImage(img,
                                     this->cam_encoding_,
                                     xi_img.height,
@@ -605,92 +560,14 @@ void XimeaROSCam::frameCaptureCb() {
                                     img_buffer);
             img.header.frame_id = this->cam_frameid_;
             img.header.stamp = timestamp;
-            
-            
-            //Publish image
-            sensor_msgs::msg::CameraInfo cam_info =
-                    this->cam_info_manager_->getCameraInfo();
-                    
-            this->cam_pub_.publish(img, cam_info);
-            //this->cam_pub_.publish(img);
-            */
 
-            //RESIZING 
-            this->resized_header.stamp = timestamp;
-            this->resized_header.frame_id = this->cam_frameid_;
-            sensor_msgs::msg::CameraInfo cam_resized_info = this->cam_info_manager_->getCameraInfo();
-            sensor_msgs::msg::Image img_small; 
-            cv_bridge::CvImage cv_img;
-
-            //resize image by converting to cv image 
-            this->img_mat = cv::Mat(xi_img.height, xi_img.width, CV_8UC3, img_buffer);
-            resize(this->img_mat, this->img_resized, Size(640, 512), cv::INTER_LINEAR);
-            cv_img = cv_bridge::CvImage(this->resized_header, this->cam_encoding_, this->img_resized);
-            cv_img.toImageMsg(img_small); // from cv_bridge to sensor_msgs::Image
-            
-            //publish image 
-            cam_resized_info.height = 512;
-            cam_resized_info.width = 640;
-            this->image_resized_pub_.publish(img_small, cam_resized_info);
-            RCLCPP_INFO(this->get_logger(), "Small image published");
-
-
+            this->cam_pub_->publish(img);
+            RCLCPP_INFO_STREAM(this->get_logger(), "Image Published: " << ++this->img_count_);
         }
     }
 
     // To avoid warnings
     (void)xi_stat;
 }
-
-/**
-
-BagRecorder::BagRecorder()
-: Node("cam_bag_recorder")
-{   
-    const rosbag2_cpp::StorageOptions storage_options({"cam_bag", "sqlite3"});
-    const rosbag2_cpp::ConverterOptions converter_options(
-        {rmw_get_serialization_format(),
-         rmw_get_serialization_format()});
-
-    this->bag_writer_ = std::make_unique<rosbag2_cpp::writers::SequentialWriter>();
-    this->bag_writer_->open(storage_options, converter_options);
-    this->bag_writer_->create_topic({
-        "image_raw",
-        "sensor_msgs/msg/Image",
-        rmw_get_serialization_format(),
-        ""
-    });
-
-    this->bag_subscription_ = create_subscription<sensor_msgs::msg::Image>(
-        "image_raw", 10, std::bind(&BagRecorder::topic_callback, this, std::placeholders::_1));
-}
-
-void BagRecorder::topic_callback(std::shared_ptr<rclcpp::SerializedMessage> msg) const
-{   
-    auto bag_message = std::make_shared<rosbag2_storage::SerializedBagMessage>();
-    
-    bag_message->serialized_data = std::shared_ptr<rcutils_uint8_array_t>(
-        new rcutils_uint8_array_t,
-        [this](rcutils_uint8_array_t *msg) {
-            auto fini_return = rcutils_uint8_array_fini(msg);
-            delete msg;
-            if (fini_return != RCUTILS_RET_OK) {
-                RCLCPP_ERROR(get_logger(), "Failed to destroy serialized msg %s", rcutils_get_error_string().str);
-            }
-        }
-    );
-
-    *bag_message->serialized_data = msg->release_rcl_serialized_message();
-
-    bag_message->topic_name = "image_raw";
-    if (rcutils_system_time_now(&bag_message->time_stamp) != RCUTILS_RET_OK) {
-        RCLCPP_ERROR(get_logger(), "ERROR getting current time: %s", rcutils_get_error_string().str);
-    }
-
-    this->bag_writer_->write(bag_message);
-
-}
-
-*/
 
 }

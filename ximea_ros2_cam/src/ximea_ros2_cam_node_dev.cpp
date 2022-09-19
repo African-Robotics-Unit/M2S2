@@ -1,4 +1,4 @@
-#include "ximea_ros2_cam/ximea_ros2_cam.hpp"
+#include "ximea_ros2_cam/ximea_ros2_cam_dev.hpp"
 
 int main(int argc, char ** argv)
 {

@@ -10,7 +10,7 @@ from launch.substitutions import LaunchConfiguration, PythonExpression
 def generate_launch_description():
 
     # ARGS
-    bag_name = LaunchConfiguration("bag_name")
+    bag_name = LaunchConfiguration("bag")
     image_topic = LaunchConfiguration("image_topic")
     image_info_topic = LaunchConfiguration("image_info_topic")
     audio_topic = LaunchConfiguration("audio_topic")
@@ -23,12 +23,12 @@ def generate_launch_description():
     
     image_topic_arg = DeclareLaunchArgument(
         'image_topic',
-        default_value='/image_raw'
+        default_value='/image_resized_raw'
     )
 
     image_info_topic_arg = DeclareLaunchArgument(
         'image_info_topic',
-        default_value='camera_info'
+        default_value='/camera_info'
     )
 
     audio_topic_args = DeclareLaunchArgument(
@@ -38,7 +38,7 @@ def generate_launch_description():
 
     enviro_topic_arg = DeclareLaunchArgument(
         'enviro_topic',
-        default_value='enviro_data'
+        default_value='/enviro_data'
     )
 
     ld = LaunchDescription([
@@ -68,6 +68,14 @@ def generate_launch_description():
                 'launch/capture.launch.xml'))
     )
 
+    #Audio Play
+    # audio_play_launch = IncludeLaunchDescription(
+    #     AnyLaunchDescriptionSource(
+    #         os.path.join(
+    #             get_package_share_directory('audio_play'),
+    #             'launch/play.launch.xml'))
+    # )
+
     #Enviro capture to ROS Bag
     enviro_capture_to_bag_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
@@ -83,6 +91,13 @@ def generate_launch_description():
                 get_package_share_directory('ximea_ros2_cam'),
                 'launch/xiCam.launch.xml'))
     )
+    
+    flir_boson_to_bag_launch = IncludeLaunchDescription(
+        AnyLaunchDescriptionSource(
+            os.path.join(
+		get_package_share_directory('flir_boson_usb'),
+	       'launch/flir_boson.launch'))
+    )
 
     # Record all topics at once
 
@@ -92,16 +107,17 @@ def generate_launch_description():
                 'bag',
                 'record',
                 image_topic,
-                image_info_topic,
                 audio_topic,
-                enviro_topic , '-o',
+                enviro_topic,
+                '/thermal_raw', '-o',
                 bag_name],
             output='screen'
     )
 
     # Add Nodes
-    ld.add_action(audio_capture_to_bag_launch)
-    ld.add_action(enviro_capture_to_bag_launch)
+    #ld.add_action(audio_capture_to_bag_launch)
+    #ld.add_action(enviro_capture_to_bag_launch)
     ld.add_action(ximea_capture_to_bag_launch)
-    ld.add_action(record_all_topics_action)
+    ld.add_action(flir_boson_to_bag_launch)
+    #ld.add_action(record_all_topics_action)
     return ld 

@@ -17,6 +17,7 @@ find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
 	"msg/EnviroData.msg"
+  "msg/FlirBosonRaw.msg"
 	DEPENDENCIES builtin_interfaces std_msgs
 )
 

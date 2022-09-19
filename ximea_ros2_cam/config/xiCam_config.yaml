@@ -40,13 +40,13 @@ ximea_cam_node:
     hw_trigger_edge: 0            # if hw trigger, 0/1 = rising/falling edge trigger
 
     # for camera frame rate
-    frame_rate_control: true      # enable or disable frame rate control
+    frame_rate_control: false      # enable or disable frame rate control
                                   # (works if no triggering is enabled)
     frame_rate_set: 0            # for trigger mode, fps limiter (0 for none)
     img_capture_timeout: 1000     # timeout in milliseconds for xiGetImage()
 
     # exposure settings
-    auto_exposure: false          # auto exposure on or off
+    auto_exposure: true         # auto exposure on or off
     exposure_time: 6000           # manual exposure time in microseconds
     manual_gain: 9.0              # manual exposure gain
     auto_exposure_priority: 0.8   # auto exposure to gain ratio (1 = use only exposure)
@@ -61,7 +61,15 @@ ximea_cam_node:
     white_balance_coef_blue: 4.0  # white balance blue coefficient (0 to 8)
 
     # region of interest
-    roi_left: 0                   # top left corner in pixels
-    roi_top: 0
+    roi_left: 384                   # top left corner in pixels
+    roi_top: 32
     roi_width: 1280               # width height in pixels
     roi_height: 1024
+    
+    # lens control -> Only works if lens_mode is set to 1 (XI_ON)
+    # lens_mode: 0		      #XI_PRM_LENS_MODE or "lens_mode", 1 to enable lens control, else 0
+    # lens_aperture_value: 0.0	      #XI_PRM_LENS_APERTURE_VALUE or "lens_aperture_value"
+    # lens_aperture_index: 0            #XI_PRM_LENS_APERTURE_INDEX or "lens_aperture_index"
+    # lens_focus_movement_value: 0      #XI_PRM_LENS_FOCUS_MOVEMENT_VALUE or "lens_focus_movement_value"
+    # lens_focus_move: 0                #XI_PRM_LENS_FOCUS_MOVE or "lens_focus_move"
+    # lens_focal_length: 0 	     #XI_PRM_LENS_FOCAL_LENGTH or "lens_focal_length   

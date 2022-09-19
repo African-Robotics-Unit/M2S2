@@ -24,7 +24,7 @@ public:
 		
 		publisher_ = this->create_publisher<m2s2_custom_interfaces::msg::EnviroData>("enviro_data", 10);
 		timer_ = this->create_wall_timer(
-			std::chrono::seconds(1), std::bind(&EnviroNode::bme_timer_callback, this));
+			std::chrono::seconds(60), std::bind(&EnviroNode::bme_timer_callback, this));
 	}
 		
 private:

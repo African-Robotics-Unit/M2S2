@@ -25,6 +25,9 @@ find_package(std_msgs REQUIRED)
 find_package(camera_calibration_parsers REQUIRED)
 find_package(camera_info_manager REQUIRED)
 find_package(image_transport REQUIRED)
+find_package(rosbag2_cpp REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_executable(ximea_ros2_cam_node src/ximea_ros2_cam_node.cpp src/ximea_ros2_cam.cpp)
 ament_target_dependencies(ximea_ros2_cam_node 
@@ -32,15 +35,19 @@ ament_target_dependencies(ximea_ros2_cam_node
   "image_transport"
   "sensor_msgs"
   "camera_calibration_parsers"
-  "camera_info_manager")
+  "camera_info_manager"
+  "rosbag2_cpp"
+  "cv_bridge")
 
 target_include_directories(ximea_ros2_cam_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
-  ${XIMEA_INCLUDE_PATH})
+  ${XIMEA_INCLUDE_PATH}
+  ${OpenCV_INCLUDE_DIRS})
 
 target_link_libraries(ximea_ros2_cam_node
   ${XIMEA_LIBRARY}
+  ${OpenCV_LIBRARIES}
 )
 
 install(TARGETS ximea_ros2_cam_node

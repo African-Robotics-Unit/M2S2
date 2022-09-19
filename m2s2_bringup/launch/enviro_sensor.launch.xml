@@ -6,6 +6,6 @@
    </node>
   </group>
 
-  <executable cmd="ros2 bag record /enviro_data -o bags/test_enviro" output="screen" />
+  <!-- <executable cmd="ros2 bag record /enviro_data -o bags/test_enviro" output="screen" /> -->
 
-</launch>                            
+</launch>                        

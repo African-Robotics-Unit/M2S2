@@ -17,7 +17,7 @@ def generate_launch_description():
             ]),
             launch_arguments={
                 'bag_name': 'bags/test',
-                'image_topic': '/image_raw',
+                'image_topic': '/image_resized_raw',
                 'image_info_topic': '/camera_info',
                 'audio_topic': '/audio/audio',
                 'enviro_topic': '/enviro_data'

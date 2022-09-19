@@ -27,16 +27,16 @@ namespace audio_transport
         std::string sample_format;
 
         // The destination of the audio
-        this->declare_parameter<std::string>("~dst", "./output_5.mp3");
+        this->declare_parameter<std::string>("dst", "alsasink");
         this->declare_parameter<std::string>("~device", std::string());
         this->declare_parameter<bool>("~do_timestamp",  true);
-        this->declare_parameter<std::string>("~format", "mp3");
+        this->declare_parameter<std::string>("~format", "wave");
         this->declare_parameter<int>("~channels", 1);
         this->declare_parameter<int>("~depth", 16);
         this->declare_parameter<int>("~sample_rate", 16000);
         this->declare_parameter<std::string>("~sample_format", "S16LE");
 
-        this->get_parameter("~dst", dst_type);
+        this->get_parameter("dst", dst_type);
         this->get_parameter("~device", device);
         this->get_parameter("~do_timestamp", do_timestamp);
         this->get_parameter("~format", format);
@@ -90,8 +90,6 @@ namespace audio_transport
           g_object_set(G_OBJECT(_sink), "location", dst_type.c_str(), NULL);
         }
 
-
-
         if (format == "mp3")
         {
           if (dst_type == "alsasink")
@@ -107,13 +105,10 @@ namespace audio_transport
             gst_object_unref(audiopad);
             gst_caps_unref(caps);
           }
-
-          
           else
           {
             gst_bin_add_many(GST_BIN(_pipeline), _source, _sink, NULL);
             gst_element_link(_source, _sink);
-      
           }
         }
         else if (format == "wave")
@@ -154,11 +149,6 @@ namespace audio_transport
         GstFlowReturn ret;
 
         g_signal_emit_by_name(_source, "push-buffer", buffer, &ret);
-
-        //timestamp
-        RCLCPP_INFO(this->get_logger(), "%s", msg->header.stamp);
-
-
       }
 
      static void cb_newpad (GstElement *decodebin, GstPad *pad, 
