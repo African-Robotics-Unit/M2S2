@@ -1,0 +1,10 @@
+<launch>
+  <!-- This launchfile should bring up a node that subscribes to an /image_raw topic and stores images in .jpeg files -->
+  <group>
+   <node pkg="image_subscriber" exec="image_sub_node" name="image_sub_node">
+      <param name="output_directory" value="/home/aru/m2s2_ws/20221014/QOS/images/1"/>
+      <param name="topic" value="/image_raw"/>
+   </node>
+  </group>
+
+</launch>

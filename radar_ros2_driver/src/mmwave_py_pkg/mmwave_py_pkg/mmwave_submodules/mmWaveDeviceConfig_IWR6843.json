@@ -1,0 +1,148 @@
+{
+   "dfeDataOutputMode": {
+      "frmMode": 1
+   },
+   "channelCfg": {
+      "rxChannelEn": 15,
+      "txChannelEn": 7,
+      "casMode": 0
+   },
+   "adcCfg": {
+      "numADCBits": 2,
+      "adcOutputFmt": 1
+   },
+   "adcbufCfg": {
+      "subFrameIdx": -1,
+      "adcOutputFmt": 0,
+      "SampleSwap": 1,
+      "chanInterleave": 1,
+      "chirpThreshold": 1
+   },
+   "profileCfg": {
+      "profileId": 0,
+      "startFreq": 60,
+      "idleTime": 117,
+      "adcStartTime": 7,
+      "rampEndTime": 13.12,
+      "txOutPower": 0,
+      "txPhaseShifter": 0,
+      "freqSlopeConst": 38.11,
+      "txStartTime": 1,
+      "numAdcSamples": 64,
+      "digOutSampleRate": 12500,
+      "hpfCornerFreq1": 0,
+      "hpfCornerFreq2": 0,
+      "rxGain": 158
+   },
+   "chirpCfg_0": {
+      "chirpStartIndex": 0,
+      "chirpEndIndex": 0,
+      "profileId": 0,
+      "startFreqVar": 0,
+      "freqSlopeVar": 0,
+      "idleTimeVar": 0,
+      "ADCStartTimeVar": 0,
+      "chirpAntennaEnMask": 1
+   },
+   "chirpCfg_1": {
+      "chirpStartIndex": 1,
+      "chirpEndIndex": 1,
+      "profileId": 0,
+      "startFreqVar": 0,
+      "freqSlopeVar": 0,
+      "idleTimeVar": 0,
+      "ADCStartTimeVar": 0,
+      "chirpAntennaEnMask": 7
+   },
+   "frameCfg": {
+      "chirpStartIndex": 1,
+      "chirpEndIndex": 1,
+      "numChirps": 32,
+      "numFrames": 100,
+      "framePeriod": 100,
+      "triggerSelect": 1,
+      "frameTriggerDelay": 0
+   },
+   "lowPower": {
+      "dontCare": 0,
+      "adcMode": 0
+   },
+   "lvdsStreamCfg": {
+      "subFrameIdx ": -1,
+      "enableHeader": 0,
+      "dataFmt": 1,
+      "enableSW": 0
+   },
+   "calibMonCfg": {
+      "calibMonTimeUnit": 1,
+      "calibPeriodicity": 1
+   },
+   "monCalibReportCfg": {
+      "enableCalibReport": 1,
+      "enableFailureReport": 1,
+      "reserved": 0
+   },
+   "txPowerMonCfg_0": {
+      "enable": 1,
+      "TxAnt": 0,
+      "profileIdx": 0
+   },
+   "txPowerMonCfg_1": {
+      "enable": 1,
+      "TxAnt": 1,
+      "profileIdx": 0
+   },
+   "txPowerMonCfg_2": {
+      "enable": 1,
+      "TxAnt": 2,
+      "profileIdx": 0
+   },
+   "txBallbreakMonCfg_0": {
+      "enable": 1,
+      "TxAnt": 0
+   },
+   "txBallbreakMonCfg_1": {
+      "enable": 1,
+      "TxAnt": 1
+   },
+   "txBallbreakMonCfg_2": {
+      "enable": 1,
+      "TxAnt": 2
+   },
+   "rxGainPhaseMonCfg": {
+      "enable": 1,
+      "profileIdx": 0
+   },
+   "tempMonCfg": {
+      "enable": 1,
+      "tempDiffThresh": 20
+   },
+   "synthFreqMonCfg": {
+      "enable": 1,
+      "profileIdx": 0
+   },
+   "pllConVoltMonCfg": {
+      "enable": 1
+   },
+   "dualClkCompMonCfg": {
+      "enable": 1
+   },
+   "rxIfStageMonCfg": {
+      "enable": 1,
+      "profileIdx": 0
+   },
+   "extAnaSigMonCfg": {
+      "enable": 0
+   },
+   "pmClkSigMonCfg": {
+      "enable": 1,
+      "profileIdx": 0
+   },
+   "rxIntAnaSigMonCfg": {
+      "enable": 1,
+      "profileIdx": 0
+   },
+   "gpadcSigMonCfg": {
+      "enable": 1
+   }
+}

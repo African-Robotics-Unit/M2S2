@@ -4,7 +4,7 @@
   <name>sync_subscriber</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="lindelanimcebo@gmail.com">aru</maintainer>
+  <maintainer email="avally02@gmail.com">aru</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -13,6 +13,12 @@
   <test_depend>ament_lint_common</test_depend>
 
   <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>m2s2_custom_interfaces</depend>
+  <depend>message_filters</depend>
+  <depend>audio_common_msgs</depend>
+  <depend>flir_lepton_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -1,4 +1,4 @@
-# The raw data in each pixel after calibration
+#raw thermal data in uint16  
 std_msgs/Header header
 
 uint16 height

@@ -115,7 +115,7 @@ def generate_launch_description():
     )
 
     # Add Nodes
-    #ld.add_action(audio_capture_to_bag_launch)
+    ld.add_action(audio_capture_to_bag_launch)
     #ld.add_action(enviro_capture_to_bag_launch)
     ld.add_action(ximea_capture_to_bag_launch)
     ld.add_action(flir_boson_to_bag_launch)

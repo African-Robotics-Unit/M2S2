@@ -46,11 +46,13 @@ XimeaROSCam::XimeaROSCam() :
     cam_white_balance_mode_(0),
     age_min(0.0),
     is_active_(false),
+    cam_model_(0),
     xi_h_(NULL) {
     
     this->initCam();
     this->initPubs();
     this->initTimers();
+    this->openDeviceCb();
 
     RCLCPP_INFO(this->get_logger(), "Node initialized..");
 }
@@ -96,9 +98,9 @@ void XimeaROSCam::initTimers() {
 
     // Load camera polling callback timer ((Ensure that with multiple cameras,
     // each time is about 2 seconds spaced apart)
-    this->xi_open_device_cb_ =
+   /* this->xi_open_device_cb_ =
         this->create_wall_timer(std::chrono::duration<float>(this->poll_time_),
-        std::bind(&XimeaROSCam::openDeviceCb, this));
+        std::bind(&XimeaROSCam::openDeviceCb, this)); */
 
     RCLCPP_INFO_STREAM(this->get_logger(), "xi_open_device_cb_: " << this->xi_open_device_cb_);
 
@@ -128,7 +130,7 @@ void XimeaROSCam::initCam() {
     this->declare_parameter( "serial_no", std::string("INVALID"));
     this->get_parameter("serial_no", this->cam_serialno_);
     RCLCPP_INFO_STREAM(this->get_logger(), "serial number: " << this->cam_serialno_);
-    this->declare_parameter( "frame_id", std::string("INVALID"));
+    this->declare_parameter( "frame_id", std::string("'0'"));
     this->get_parameter("frame_id", this->cam_frameid_);
     RCLCPP_INFO_STREAM(this->get_logger(), "frame id: " << this->cam_frameid_);
     this->declare_parameter( "calib_file", std::string("INVALID"));
@@ -251,9 +253,18 @@ void XimeaROSCam::initCam() {
     this->xi_h_ = NULL;
 
     // Setup image transport (camera publisher) and camera info topics
-    this->cam_pub_ = image_transport::create_camera_publisher(this, "image_raw");
+    rmw_qos_profile_t rmw_qos_profile_ximea_custom = rmw_qos_profile_sensor_data;
+    rmw_qos_profile_ximea_custom.depth = 1;
+
+    this->cam_pub_ = image_transport::create_camera_publisher(this, "image_raw"); //, rmw_qos_profile_ximea_custom);
+    
     //create publisher for resized image 
     this->image_resized_pub_ = image_transport::create_camera_publisher(this, "image_resized_raw");
+    
+    //create publisher for compressed image
+    //this->image_compressed_pub_ = this->create_publisher<sensor_msgs::msg::CompressedImage>("image_compressed", 10);
+
+
 
     // only load and publish calib file if it isn't empty
     // assume camera info is not loaded
@@ -278,7 +289,6 @@ void XimeaROSCam::initCam() {
 }
 
 void XimeaROSCam::openCam() {
-
     // Init variables
     XI_RETURN xi_stat;
 
@@ -352,7 +362,6 @@ void XimeaROSCam::openCam() {
         // Disable any triggering
         xi_stat = xiSetParamInt(this->xi_h_, XI_PRM_TRG_SOURCE, XI_TRG_OFF);
     }
-
     //      -- Set exposure --
     // If auto exposure is set to 0, then set manual exposure, otherwise set
     // auto exposure.
@@ -396,7 +405,6 @@ void XimeaROSCam::openCam() {
                                   this->cam_autogain_limit_);
     }
 
-
     //      -- Set region of interest --
     int max_cam_width = CamMaxPixelWidth[this->cam_model_];
     RCLCPP_INFO_STREAM(this->get_logger(),  "MAX WIDTH: " << max_cam_width);
@@ -410,6 +418,18 @@ void XimeaROSCam::openCam() {
         this->cam_roi_height_ < 0 || this->cam_roi_height_ > max_cam_height ||
         this->cam_roi_left_ + this->cam_roi_width_ > max_cam_width ||
         this->cam_roi_top_ + this->cam_roi_height_ > max_cam_height) {
+
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_left_: " << this->cam_roi_left_);
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_top_: " << this->cam_roi_top_);
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_width_: " << this->cam_roi_width_);
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_height_: " << this->cam_roi_height_);
+
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_left_: " << this->cam_roi_left_);
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_top_: " << this->cam_roi_top_);
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_width_: " << this->cam_roi_width_);
+        RCLCPP_INFO_STREAM(this->get_logger(), "cam_roi_height_: " << this->cam_roi_height_);
+
+
         // Out of bounds, throw error here
         return;
     }
@@ -515,7 +535,6 @@ void XimeaROSCam::openCam() {
    	
    	
    }
-	
     //      -- Start camera acquisition --
     RCLCPP_INFO(this->get_logger(),  "Starting Acquisition...");
     xi_stat = xiStartAcquisition(this->xi_h_);
@@ -562,62 +581,71 @@ void XimeaROSCam::frameCaptureCb() {
     xi_img.bp_size = 0;
 
     // Acquisition started
+    //RCLCPP_INFO(this->get_logger(), "CAPTURING FRAME");
     if (this->is_active_) {
         // Acquire image
         xi_stat = xiGetImage(this->xi_h_,
                              this->cam_img_cap_timeout_,
                              &xi_img);
-                             
         // Add timestamp
         timestamp = now();
 
         // Was the image retrieval successful?
         if (xi_stat == XI_OK) {
-            
-            /**
-            auto msg = std_msgs::msg::UInt32();
-            msg.data = ++this->img_count_;
-            this->cam_img_counter_pub_->publish(msg);
-            RCLCPP_INFO_STREAM(this->get_logger(), "Successfully captured image: " << this->img_count_);
-            */
-        /**
-            RCLCPP_INFO_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 3,
+        	
+    
+            /*RCLCPP_INFO_STREAM_THROTTLE(this->get_logger(), *this->get_clock(), 3,
                 "Capturing image from Ximea camera serial no: "
                 << this->cam_serialno_
                 << ". WxH: "
                 << xi_img.width
                 << " x "
                 << xi_img.height << ".");
-        */
-
+                */
+        
             // Setup image
             img_buffer = reinterpret_cast<char *>(xi_img.bp);
-
-            // Publish as ROS message
-            /**
-            sensor_msgs::msg::Image img;
+	
             // Populate ROS message
+            sensor_msgs::msg::Image img;
             sensor_msgs::fillImage(img,
                                     this->cam_encoding_,
                                     xi_img.height,
                                     xi_img.width,
                                     xi_img.width * this->cam_bytesperpixel_,
                                     img_buffer);
-            img.header.frame_id = this->cam_frameid_;
+            img.header.frame_id = std::to_string(this->img_count_++);
             img.header.stamp = timestamp;
             
             
             //Publish image
             sensor_msgs::msg::CameraInfo cam_info =
-                    this->cam_info_manager_->getCameraInfo();
-                    
+                    this->cam_info_manager_->getCameraInfo();      
             this->cam_pub_.publish(img, cam_info);
-            //this->cam_pub_.publish(img);
-            */
+            RCLCPP_INFO(this->get_logger(), "Image published: [%i]", this->img_count_);
+            
+            
+            /*
+            // CompressedImage
+            this->img_mat = cv::Mat(xi_img.height, xi_img.width, CV_8UC3, img_buffer);
+            cv_bridge::CvImage img_bridge = 
+                  cv_bridge::CvImage(img.header, this->cam_encoding_, this->img_mat);
 
+            sensor_msgs::msg::CompressedImage img_msg;
+            img_bridge.toCompressedImageMsg(img_msg); //dst_format = JPG
+            this->image_compressed_pub_->publish(img_msg);
+            */
+            
+
+
+            /**
             //RESIZING 
             this->resized_header.stamp = timestamp;
+
+            // add frame count to frame_id
+            this->cam_frameid_ = std::to_string(this->img_count_);
             this->resized_header.frame_id = this->cam_frameid_;
+
             sensor_msgs::msg::CameraInfo cam_resized_info = this->cam_info_manager_->getCameraInfo();
             sensor_msgs::msg::Image img_small; 
             cv_bridge::CvImage cv_img;
@@ -634,63 +662,17 @@ void XimeaROSCam::frameCaptureCb() {
             this->image_resized_pub_.publish(img_small, cam_resized_info);
             RCLCPP_INFO(this->get_logger(), "Small image published");
 
+            this->img_count_++;
+            */
+
+            
 
         }
+    
     }
 
     // To avoid warnings
     (void)xi_stat;
-}
+} // XIMEA_CAM_CLASS
 
-/**
-
-BagRecorder::BagRecorder()
-: Node("cam_bag_recorder")
-{   
-    const rosbag2_cpp::StorageOptions storage_options({"cam_bag", "sqlite3"});
-    const rosbag2_cpp::ConverterOptions converter_options(
-        {rmw_get_serialization_format(),
-         rmw_get_serialization_format()});
-
-    this->bag_writer_ = std::make_unique<rosbag2_cpp::writers::SequentialWriter>();
-    this->bag_writer_->open(storage_options, converter_options);
-    this->bag_writer_->create_topic({
-        "image_raw",
-        "sensor_msgs/msg/Image",
-        rmw_get_serialization_format(),
-        ""
-    });
-
-    this->bag_subscription_ = create_subscription<sensor_msgs::msg::Image>(
-        "image_raw", 10, std::bind(&BagRecorder::topic_callback, this, std::placeholders::_1));
-}
-
-void BagRecorder::topic_callback(std::shared_ptr<rclcpp::SerializedMessage> msg) const
-{   
-    auto bag_message = std::make_shared<rosbag2_storage::SerializedBagMessage>();
-    
-    bag_message->serialized_data = std::shared_ptr<rcutils_uint8_array_t>(
-        new rcutils_uint8_array_t,
-        [this](rcutils_uint8_array_t *msg) {
-            auto fini_return = rcutils_uint8_array_fini(msg);
-            delete msg;
-            if (fini_return != RCUTILS_RET_OK) {
-                RCLCPP_ERROR(get_logger(), "Failed to destroy serialized msg %s", rcutils_get_error_string().str);
-            }
-        }
-    );
-
-    *bag_message->serialized_data = msg->release_rcl_serialized_message();
-
-    bag_message->topic_name = "image_raw";
-    if (rcutils_system_time_now(&bag_message->time_stamp) != RCUTILS_RET_OK) {
-        RCLCPP_ERROR(get_logger(), "ERROR getting current time: %s", rcutils_get_error_string().str);
-    }
-
-    this->bag_writer_->write(bag_message);
-
-}
-
-*/
-
-}
+} //XIMEA_CAM_NAMESPACE

@@ -1,0 +1,23 @@
+<launch>
+    <group>
+        <node pkg="ximea_ros2_cam" name="ximea_cam_node" exec="ximea_ros2_cam_node" output="screen">
+            <param name="serial_no" value="'29970251'" />
+            <param name="cam_name" value="ximea_cam" />
+            <param name="calib_file" value=""/>
+            <param name="frame_id" value="'0'"/>
+            <param name="num_cams_in_bus" value="2"/>
+            <param name="bw_safetyratio" value="1.0"/>
+            <param name="publish_xi_image_info" value="true"/>
+            <param name="poll_time" value="2.0"/>
+            <param name="poll_time_frame" value="0.001"/>
+            <param from="$(find-pkg-share ximea_ros2_cam)/config/xiCam_config.yaml"/>
+            
+        </node>
+    </group>
+    
+
+ 
+
+
+
+</launch>

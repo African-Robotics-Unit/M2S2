@@ -2,6 +2,7 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 #include <boost/thread.hpp>
+#include <string>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -15,7 +16,10 @@ namespace audio_transport
     public:
       RosGstCapture()
       : Node("audio_capture")
-      {
+      {   
+        //frame count to be stored in frame_id of Header  
+        this->frame_count = 0;
+        
         _bitrate = 192;
         std::string dst_type;
         std::string device;
@@ -179,8 +183,12 @@ namespace audio_transport
 
       void publish(audio_common_msgs::msg::AudioData &msg )
       {
+        msg.header.frame_id = std::to_string(this->frame_count);
         msg.header.stamp = now();
+        
         _pub->publish(msg);
+        this->frame_count++;
+
       }
 
       static GstFlowReturn onNewBuffer (GstAppSink *appsink, gpointer userData)
@@ -237,6 +245,8 @@ namespace audio_transport
       int _bitrate, _channels, _depth, _sample_rate;
       GMainLoop *_loop;
       std::string _format, _sample_format;
+
+      int frame_count;
 
   };
 }

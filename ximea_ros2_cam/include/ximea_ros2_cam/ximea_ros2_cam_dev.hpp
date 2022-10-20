@@ -175,6 +175,15 @@ class XimeaROSCam : public rclcpp::Node, std::enable_shared_from_this<XimeaROSCa
    rclcpp::TimerBase::SharedPtr t_frame_cb_;
    void frameCaptureCb();
 
+   // Threads callbacks
+   void publish_image_cb(char *img_buffer, 
+                           XI_IMG xi_img,
+                              rclcpp::Time timestamp);
+                              
+   void save_binary_image_cb(char *img_buffer,
+                              int img_size,
+                                 std::string filename);
+
 };  // class XimeaROSCam
 
 }  // namespace ximea_ros_cam

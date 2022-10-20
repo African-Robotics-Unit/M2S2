@@ -44,6 +44,7 @@ XimeaROSCam::XimeaROSCam() :
     cam_trigger_mode_(0),
     cam_framerate_control_(false),
     cam_white_balance_mode_(0),
+    cam_model_(0),
     age_min(0.0),
     is_active_(false),
     xi_h_(NULL) {
@@ -60,6 +61,8 @@ XimeaROSCam::~XimeaROSCam() {
     // Init variables
     XI_RETURN xi_stat;
 
+    // TODO: Save API Context
+
     RCLCPP_INFO(this->get_logger(), "Shutting down ximea_ros_cam node...");
     // Stop acquisition and close device if handle is available
     if (this->xi_h_ != NULL) {
@@ -67,6 +70,21 @@ XimeaROSCam::~XimeaROSCam() {
         this->is_active_ = false;
         xi_stat = xiStopAcquisition(this->xi_h_);
 
+        // Save Camera context before closing
+        char* cam_context=NULL;
+        #define SIZE_OF_CONTEXT_BUFFER (10*1024*1024) // 10MiB - probaly should be defined in the hearder
+        cam_context = (char*)malloc(SIZE_OF_CONTEXT_BUFFER);
+        xiGetParamString(this->xi_h_,
+                    XI_PRM_API_CONTEXT_LIST, 
+                    cam_context,
+                    SIZE_OF_CONTEXT_BUFFER);
+        
+        std::string context_filename = "img/context.bin";
+        this->save_binary_image_cb(cam_context, 
+                                    SIZE_OF_CONTEXT_BUFFER,
+                                    context_filename);
+        RCLCPP_INFO(this->get_logger(), "SAVED Camera Context")
+        
         // Close camera device
         xiCloseDevice(this->xi_h_);
         this->xi_h_ = NULL;
@@ -125,38 +143,52 @@ void XimeaROSCam::initCam() {
     //      -- apply camera name --
     this->declare_parameter("cam_name", std::string("INVALID"));
     this->get_parameter("cam_name", this->cam_name_);
+
     RCLCPP_INFO_STREAM(this->get_logger(), "cam_name: " << this->cam_name_);
     
     //      -- apply camera specific parameters --
     this->declare_parameter( "serial_no", std::string("INVALID"));
     this->get_parameter("serial_no", this->cam_serialno_);
-    RCLCPP_INFO_STREAM(this->get_logger(), "serial number: " << this->cam_serialno_);
+    
     this->declare_parameter( "frame_id", std::string("INVALID"));
     this->get_parameter("frame_id", this->cam_frameid_);
-    RCLCPP_INFO_STREAM(this->get_logger(), "frame id: " << this->cam_frameid_);
+    
     this->declare_parameter( "calib_file", std::string("INVALID"));
     this->get_parameter("calib_file", this->cam_calib_file_);
-    RCLCPP_INFO_STREAM(this->get_logger(), "calibration file: " << this->cam_calib_file_);
+    
     this->declare_parameter("poll_time", -1.0f);
     this->get_parameter("poll_time", this->poll_time_);
-    RCLCPP_INFO_STREAM(this->get_logger(), "poll_time: " << this->poll_time_);
+    
     this->declare_parameter("poll_time_frame", 0.0f);
     this->get_parameter("poll_time_frame", this->poll_time_frame_);
+    
+    RCLCPP_INFO_STREAM(this->get_logger(), "serial number: " << this->cam_serialno_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "frame id: " << this->cam_frameid_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "calibration file: " << this->cam_calib_file_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "poll_time: " << this->poll_time_);
     RCLCPP_INFO_STREAM(this->get_logger(), "poll_time_frame: " << this->poll_time_frame_);
+
+    
 
     //      -- apply compressed image parameters (from image_transport) --
     this->declare_parameter( "image_transport_compressed_format", std::string("INVALID"));
     this->get_parameter( "image_transport_compressed_format", this->cam_compressed_format_);
-    RCLCPP_INFO_STREAM(this->get_logger(), "image_transport_compressed_format: "
-        << this->cam_compressed_format_);
+    
     this->declare_parameter( "image_transport_compressed_jpeg_quality", -1);
     this->get_parameter("image_transport_compressed_jpeg_quality", this->cam_compressed_jpeg_quality_);
-    RCLCPP_INFO_STREAM(this->get_logger(), "image_transport_compressed_jpeg_quality: "
-        << this->cam_compressed_jpeg_quality_);
+    
     this->declare_parameter("image_transport_compressed_png_level", -1);
     this->get_parameter("image_transport_compressed_png_level", this->cam_compressed_png_level_);
+    
+
+    RCLCPP_INFO_STREAM(this->get_logger(), "image_transport_compressed_format: "
+        << this->cam_compressed_format_);
+    RCLCPP_INFO_STREAM(this->get_logger(), "image_transport_compressed_jpeg_quality: "
+        << this->cam_compressed_jpeg_quality_);
     RCLCPP_INFO_STREAM(this->get_logger(), "image_transport_compressed_png_level: "
         << this->cam_compressed_png_level_);
+
+    
 
     //      -- apply image format parameters --
     this->declare_parameter( "format", std::string("INVALID"));
@@ -526,10 +558,9 @@ void XimeaROSCam::openDeviceCb() {
 
 void XimeaROSCam::frameCaptureCb() {
 
-    // Init variables
     XI_RETURN xi_stat;
     XI_IMG xi_img;
-    //char *img_buffer;
+
     rclcpp::Time timestamp;
     std::string time_str;
 
@@ -539,30 +570,25 @@ void XimeaROSCam::frameCaptureCb() {
 
     // Acquisition started
     if (this->is_active_) {
-        // Acquire image
+
         xi_stat = xiGetImage(this->xi_h_,
                              this->cam_img_cap_timeout_,
                              &xi_img);
-                             
-        // Add timestamp
         timestamp = now();
 
-        // Was the image retrieval successful?
         if (xi_stat == XI_OK) {
+        
+        img_buffer = reinterpret_cast<char *>(xi_img.bp);
+        // TODO: fork and join two threads
+        //       one to save the image as a binary file
+        //       another to   
+        this->publish_image_cb(img_buffer, xi_img, timestamp);
+        RCLCPP_INFO_STREAM(this->get_logger(), "Image Published: " << ++this->img_count_);
 
-            sensor_msgs::msg::Image img;
-            img_buffer = reinterpret_cast<char *>(xi_img.bp);
-            sensor_msgs::fillImage(img,
-                                    this->cam_encoding_,
-                                    xi_img.height,
-                                    xi_img.width,
-                                    xi_img.width * this->cam_bytesperpixel_,
-                                    img_buffer);
-            img.header.frame_id = this->cam_frameid_;
-            img.header.stamp = timestamp;
-
-            this->cam_pub_->publish(img);
-            RCLCPP_INFO_STREAM(this->get_logger(), "Image Published: " << ++this->img_count_);
+        this->save_binary_image_cb(img_buffer, 
+                    xi_img.width * xi_img.height * this->cam_bytesperpixel_,
+                    "img/" + std::to_string(this->img_count_) + ".bin");
+        RCLCPP_INFO_STREAM(this->get_logger(), "Image SAVED: " << ++this->img_count_);
         }
     }
 
@@ -570,4 +596,32 @@ void XimeaROSCam::frameCaptureCb() {
     (void)xi_stat;
 }
 
+void XimeaROSCam::publish_image_cb(char *img_buffer, 
+                                XI_IMG xi_img, 
+                                    rclcpp::Time timestamp)
+{
+    sensor_msgs::msg::Image img;
+    sensor_msgs::fillImage(img,
+                            this->cam_encoding_,
+                            xi_img.height,
+                            xi_img.width,
+                            xi_img.width * this->cam_bytesperpixel_,
+                            img_buffer);
+    img.header.frame_id = this->cam_frameid_;
+    img.header.stamp = timestamp;
+
+    this->cam_pub_->publish(img);
 }
+
+void XimeaROSCam::save_binary_image_cb(char *img_buffer,
+                                        int img_size,
+                                            std::string filename)
+
+{
+    std::fstream output_file(filename,
+                            std::fstream::out | std::fstream::binary);
+    output_file.write(img_buffer, img_size);
+    output_file.close();
+}
+
+} // end namespace
