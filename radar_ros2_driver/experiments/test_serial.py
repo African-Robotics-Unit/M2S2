@@ -1,14 +1,14 @@
 # radar serial test 2
 import serial
-iwr_serial = serial.Serial(port="/dev/ttyACM1", 
+iwr_serial = serial.Serial(port="/dev/ttyACM2", 
                             baudrate=115200, 
                             bytesize=serial.EIGHTBITS,
                             parity=serial.PARITY_NONE, 
                             stopbits=serial.STOPBITS_ONE, 
                             timeout=0.5)
 iwr_serial.flush()
-iwr_serial.write(b"dfeDataOutputMode 1\n")
-response = iwr_serial.read(len(b"dfeDataOutputMode 1\n")+18)
+iwr_serial.write(b"dfeDataOutputMode 1\r\n")
+response = iwr_serial.read(len(b"dfeDataOutputMode 1\r\n")+18)
 iwr_serial.reset_input_buffer()
 print(response)
 exit()
