@@ -119,5 +119,3 @@ def generate_launch_description():
     #ld.add_action(enviro_capture_to_bag_launch)
     ld.add_action(ximea_capture_to_bag_launch)
     ld.add_action(flir_boson_to_bag_launch)
-    #ld.add_action(record_all_topics_action)
-    return ld 

@@ -29,7 +29,7 @@ public:
     {
 
     // Topic
-    this->declare_parameter("topic", std::string("/image_raw"));
+    this->declare_parameter("topic", std::strin g("/image_raw"));
     this->get_parameter("topic", this->topic);
     
     // output directory

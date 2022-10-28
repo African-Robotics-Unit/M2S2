@@ -119,12 +119,12 @@ class mmWaveSystem():
         
         # setup serial comms 
         try: 
-            self.iwr_serial = serial.Serial(port="/dev/ttyACM1", 
+            self.iwr_serial = serial.Serial(port="/dev/ttyUSB0", 
                                         baudrate=115200, 
                                         bytesize=serial.EIGHTBITS,
                                         parity=serial.PARITY_NONE, 
                                         stopbits=serial.STOPBITS_ONE, 
-                                        timeout=0.5)
+                                        timeout=0.7)
             print(":> COM Port initialized")
         except Exception as e:
             print(":> Error-> UART Config Port init failed")
@@ -247,18 +247,20 @@ class mmWaveSystem():
         for cmdKey in list(self.configDict.keys()):
             cmdString = self.configs.get_mmWaveCommandString(cmdKey) # need this line to remove _x suffix from command before being written to serial
             self.write_Serial(cmdString)
-            response = self.iwr_serial.read(len(cmdString)+statusBytes)
-            self.iwr_serial.reset_input_buffer()
+            response = self.iwr_serial.read(len(cmdString))#+statusBytes
+            #self.iwr_serial.reset_input_buffer()
             print(':> ' + cmdString.strip('\n'))
             try:
-                print(" Status-> "+response.decode('utf-8').split('\n')[1]) # some error codes can be found under studio_cli\src\mss\mmwave_cli.h
-                if response.decode('utf-8').split('\n')[1] == "Error":
-                    self.mmWaveDevice_error_flag = True
+                #print(" Status-> "+response.decode('utf-8').split('\n')[1]) # some error codes can be found under studio_cli\src\mss\mmwave_cli.h
+                #if response.decode('utf-8').split('\n')[1] == "Error":
+                #    self.mmWaveDevice_error_flag = True
+                print("Response: " + str(response))
                 print("")
             except:
                 self.mmWaveDevice_error_flag = True
                 print(" Status-> Error: Invalid response received. Received: {response}".format(response=response))
                 print("")
+            time.sleep(0.6)
 
         # exit program if config failed
         if self.mmWaveDevice_error_flag:

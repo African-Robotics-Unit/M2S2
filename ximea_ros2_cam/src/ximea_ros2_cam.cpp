@@ -64,10 +64,26 @@ XimeaROSCam::~XimeaROSCam() {
     RCLCPP_INFO(this->get_logger(), "Shutting down ximea_ros_cam node...");
     // Stop acquisition and close device if handle is available
     if (this->xi_h_ != NULL) {
+
+
+        //Save Camera context
+        std::string cam_context_path = "/home/aru/repos/ximea_stuff/ecal_ximea/img/cam_context.bin";
+        char* cam_context=NULL;
+	    #define SIZE_OF_CONTEXT_BUFFER (10*1024*1024) // 10MiB
+	    cam_context = (char*)malloc(SIZE_OF_CONTEXT_BUFFER);
+	    xi_stat= xiGetParamString(this->xi_h_, XI_PRM_API_CONTEXT_LIST, cam_context, SIZE_OF_CONTEXT_BUFFER);
+
+        std::ofstream file(cam_context_path, std::ios::out | std::ios::binary);
+        file.write(cam_context, SIZE_OF_CONTEXT_BUFFER);
+        file.close();
+
+        RCLCPP_INFO_STREAM(this->get_logger(), "Done Writing camera context file");
+        std::string s(cam_context);
+        RCLCPP_INFO_STREAM(this->get_logger(), "Cam Context: " << s);
         // Stop image acquisition
         this->is_active_ = false;
         xi_stat = xiStopAcquisition(this->xi_h_);
-
+        
         // Close camera device
         xiCloseDevice(this->xi_h_);
         this->xi_h_ = NULL;
