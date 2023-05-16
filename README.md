@@ -66,20 +66,15 @@ export RMW_IMPLEMENTATION=rmw_ecal_dynamic_cpp
 
 ## Build 
 
-
-
 <hr/>
 
 ## Usage
-
 
 <hr/>
 
 ## Deserialise Data 
 Using the eCAL RMW, one can record data using their powerful[recording](https://eclipse-ecal.github.io/ecal/getting_started/recorder.html) tool. All data is stored as an ecal_measurement in .hdf5 files. 
 
-Our [m2s2_ecal_deserializers](m2s2_ecal_deserializers) provides deserializers to convert raw M2S2 measurements into readable data.
-
-NB: if you are using rosbag2 checkout our [ros2bag deserialisers](https://github.com/African-Robotics-Unit/ros2bag_file_parser).
+Our [m2s2_ecal_deserializers](m2s2_ecal_deserializers) provides deserializers to convert raw M2S2 measurements into readable data.  
 
 
