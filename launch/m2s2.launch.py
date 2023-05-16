@@ -204,11 +204,11 @@ def generate_launch_description():
     ld.add_action(lidar_capture_launch)
     ld.add_action(event_capture_launch)
     ld.add_action(event_render_launch)
-    ld.add_action(audio_capture_launch)
-    ld.add_action(enviro_capture_launch)
+    #ld.add_action(audio_capture_launch)
+    #ld.add_action(enviro_capture_launch)
     #ld.add_action(ximea_capture_launch)
     ld.add_action(realsense_capture_launch)
-    ld.add_action(audio_play_launch)
+    #ld.add_action(audio_play_launch)
     ld.add_action(rqt_gui)
 
 
