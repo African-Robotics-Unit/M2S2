@@ -63,12 +63,12 @@ def generate_launch_description():
 
     enviro_topic_arg = DeclareLaunchArgument(
         'enviro_topic',
-        default_value='/enviro_data'
+        default_value='bme280/enviro_data'
     )
 
     cam_context_arg = DeclareLaunchArgument(
         'cam_context',
-        default_value='/home/orin/m2s2_ws/Experiments/20230124/cam_context/test.bin'
+        default_value=''
     )
 
     ld = LaunchDescription([
@@ -121,21 +121,21 @@ def generate_launch_description():
     )
     
     # Radar Capture
-    radar_capture_launch = IncludeLaunchDescription(
+    '''radar_capture_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
             os.path.join(
 		get_package_share_directory('radar_bringup'),
 	       'launch/radar_proc_launch.py'))
-    )
+    )'''
     
 
-    # Livox Avia Lidar Capture
+    '''# Livox Avia Lidar Capture
     lidar_capture_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
             os.path.join(
 		get_package_share_directory('livox_ros2_driver'),
-	       'launch/livox_lidar_rviz_launch.py'))
-    )
+	       'launch/livox_lidar_launch.py'))
+    )'''
 
     # DvXplorer Capture
     event_capture_launch = IncludeLaunchDescription(
@@ -145,13 +145,6 @@ def generate_launch_description():
 	       'launch/dvxplorer_capture_mono.launch.xml'))
     )
 
-    # DvXplorer Renderer
-    event_render_launch = IncludeLaunchDescription(
-        AnyLaunchDescriptionSource(
-            os.path.join(
-		get_package_share_directory('dvs_renderer'),
-	       'launch/dvxplorer_mono.launch.xml'))
-    )
 
     #Audio Capture 
     audio_capture_launch = IncludeLaunchDescription(
@@ -161,32 +154,16 @@ def generate_launch_description():
                 'launch/capture.launch.xml'))
     )
 
-    #Audio Play
-    audio_play_launch = IncludeLaunchDescription(
-         AnyLaunchDescriptionSource(
-             os.path.join(
-                 get_package_share_directory('audio_play'),
-                 'launch/play.launch.xml'))
-    )
-
     #Enviro capture 
     enviro_capture_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
             os.path.join(
-                get_package_share_directory('bme280_ros2'),
-                'launch/bme280.launch.xml'))
+                get_package_share_directory('bme280_serial_ros2'),
+                'bme280.launch.xml'))
     )
 
-    #Display 
-    rqt_gui = Node(
-            package='rqt_gui',
-            executable='rqt_gui',
-            output='screen',
-            #arguments=['--display-config', rviz_config_path]
-    )
-    
 
-    # Record lidar and event data to ros2 bag 
+    # Record data to ros2 bag 
     #record_all_topics_action = ExecuteProcess(
     #        cmd=[
     #            'ros2',
@@ -201,16 +178,11 @@ def generate_launch_description():
     # Add Nodes
     ld.add_action(boson_capture_launch)
     ld.add_action(lepton_capture_launch)
-    ld.add_action(lidar_capture_launch)
+    #ld.add_action(lidar_capture_launch)
     ld.add_action(event_capture_launch)
-    ld.add_action(event_render_launch)
     ld.add_action(audio_capture_launch)
     ld.add_action(enviro_capture_launch)
-    #ld.add_action(ximea_capture_launch)
+    ld.add_action(ximea_capture_launch)
     ld.add_action(realsense_capture_launch)
-    ld.add_action(audio_play_launch)
-    ld.add_action(rqt_gui)
-
-
 
     return ld
