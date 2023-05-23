@@ -180,9 +180,21 @@ def generate_launch_description():
     ld.add_action(lepton_capture_launch)
     #ld.add_action(lidar_capture_launch)
     ld.add_action(event_capture_launch)
+<<<<<<< HEAD
     ld.add_action(audio_capture_launch)
     ld.add_action(enviro_capture_launch)
     ld.add_action(ximea_capture_launch)
     ld.add_action(realsense_capture_launch)
+=======
+    ld.add_action(event_render_launch)
+    #ld.add_action(audio_capture_launch)
+    #ld.add_action(enviro_capture_launch)
+    #ld.add_action(ximea_capture_launch)
+    ld.add_action(realsense_capture_launch)
+    #ld.add_action(audio_play_launch)
+    ld.add_action(rqt_gui)
+
+
+>>>>>>> b3687c2c2eb3a03ee34021929af8f4cf0cceb447
 
     return ld
