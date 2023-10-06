@@ -62,21 +62,23 @@ export RMW_IMPLEMENTATION=rmw_ecal_dynamic_cpp
 ```
 
 ## Usage
-The launch files in this repo can be used to launch all the sensors used in M2S2 simultaneously and visualise (and hear) the output streams. 
+The launch files in this repo can be used to launch the ros2 nodes of all the sensors used in M2S2 simultaneously and visualise (and hear) the output streams. 
 
 clone this repo to your ros2 workspace source directory:
 
+```bash
 $ cd ~/ros2_ws
-$ git clone https://github.com/African-Robotics-Unit/flir_boson_ROS2_driver.git
-$ cd ~/ros2_ws/flir_boson_ROS2_driver
-$ colcon build --packages-select flir_boson_ros2 flir_boson_interfaces
+$ git clone 
+$ cd ~/ros2_ws/M2S2
+$ colcon build --packages-select m2s2_bringup
 
-$ ros2 launch flir_boson_ros2 flir_boson.launch.xml
+$ ros2 launch m2s2_bringup m2s2.launch.py
 
 # To view the stream
-$ ros2 run rqt_image_view rqt_image_view
+$ ros2 launch m2s2_bringup m2s2_display.launch.py 
+```
 
-Note: For usage instructions of specific drivers, please refer to the corresponding README file. 
+<b>Note:</b> For usage instructions of specific drivers, please refer to the corresponding README file. 
 
 ## Deserialise Data 
 Using the eCAL RMW, one can record data using their powerful [recording](https://eclipse-ecal.github.io/ecal/getting_started/recorder.html) tool. All data is stored as an ecal_measurement in .hdf5 files. 
