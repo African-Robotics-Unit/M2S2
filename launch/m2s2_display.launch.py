@@ -33,14 +33,16 @@ def generate_launch_description():
             package='rqt_gui',
             executable='rqt_gui',
             output='screen',
-            #arguments=['--display-config', rviz_config_path]
     )
+    
     
     livox_rviz = Node(
             package='rviz2',
             executable='rviz2',
             output='screen',
-            arguments=['--display-config', '/home/uctseaice/ws_livox/src/livox_ros2_driver/config/livox_lidar.rviz']
+            arguments=['--display-config', os.path.join(
+                 get_package_share_directory('livox_ros2_driver'),
+                 'config/livox_lidar.rviz')]
         )
 
     # Add Nodes

@@ -4,7 +4,7 @@
   <name>m2s2_bringup</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="lindelanimcebo@gmail.com">orin</maintainer>
+  <maintainer email="avally02@gmail.com">orin</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

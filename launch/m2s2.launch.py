@@ -10,80 +10,14 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    # ARGS
-    bag_name = LaunchConfiguration("bag")
-    image_topic = LaunchConfiguration("image_topic")
-    boson_thermal_topic = LaunchConfiguration("boson_thermal_topic")
-    lepton_thermal_topic = LaunchConfiguration("lepton_thermal_topic")
-    radar_topic = LaunchConfiguration("radar_topic")
-    lidar_topic = LaunchConfiguration("lidar_topic")
-    event_topic = LaunchConfiguration("event_topic")
-    audio_topic = LaunchConfiguration("audio_topic")
-    enviro_topic = LaunchConfiguration("enviro_topic")
-    
-    bag_name_arg = DeclareLaunchArgument(
-        'bag_name',
-        default_value='bags/test'
-    )
-    
-    image_topic_arg = DeclareLaunchArgument(
-        'image_topic',
-        default_value='ximea/image_raw'
-    )
-
-    boson_thermal_topic_arg = DeclareLaunchArgument(
-        'boson_thermal_topic',
-        default_value='boson/thermal_raw'
-    )
-
-    lepton_thermal_topic_arg = DeclareLaunchArgument(
-        'lepton_thermal_topic',
-        default_value='lepton/thermal_raw'
-    )
-
-    radar_topic_arg = DeclareLaunchArgument(
-        'radar_topic',
-        default_value='/radar_data'
-    )
-
-    lidar_topic_arg = DeclareLaunchArgument(
-        'lidar_topic',
-        default_value='livox/lidar'
-    )    
-
-    event_topic_arg = DeclareLaunchArgument(
-        'event_topic',
-        default_value='dv/events'
-    )    
-
-    audio_topic_args = DeclareLaunchArgument(
-        'audio_topic',
-        default_value='audio/audio'
-    )
-
-    enviro_topic_arg = DeclareLaunchArgument(
-        'enviro_topic',
-        default_value='bme280/enviro_data'
-    )
-
-    cam_context_arg = DeclareLaunchArgument(
+    cam_context_path_arg = DeclareLaunchArgument(
         'cam_context',
         default_value=''
     )
 
     ld = LaunchDescription([
-        bag_name_arg,
-        image_topic_arg,
-        boson_thermal_topic_arg,
-        lepton_thermal_topic_arg,
-        radar_topic_arg,
-        lidar_topic_arg,
-        event_topic_arg,
-        audio_topic_args,
-        enviro_topic_arg,
-        cam_context_arg
+        cam_context_path_arg
     ])
-
 
     # PACKAGES: include launch files from other packages
 
@@ -112,30 +46,23 @@ def generate_launch_description():
 	       'launch/flir_boson.launch.xml'))
     )
 
-    # FLIR Lepton Cam Capture
-    lepton_capture_launch = IncludeLaunchDescription(
-        AnyLaunchDescriptionSource(
-            os.path.join(
-		get_package_share_directory('flir_lepton_ros2'),
-	       'flir_lepton.launch.xml'))
-    )
-    
+
     # Radar Capture
-    '''radar_capture_launch = IncludeLaunchDescription(
+    radar_capture_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
             os.path.join(
 		get_package_share_directory('radar_bringup'),
-	       'launch/radar_proc_launch.py'))
-    )'''
+	       'radar_proc_launch.py'))
+    )
     
 
-    '''# Livox Avia Lidar Capture
+    # Livox Avia Lidar Capture
     lidar_capture_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
             os.path.join(
 		get_package_share_directory('livox_ros2_driver'),
 	       'launch/livox_lidar_launch.py'))
-    )'''
+    )
 
     # DvXplorer Capture
     event_capture_launch = IncludeLaunchDescription(
@@ -146,7 +73,7 @@ def generate_launch_description():
     )
 
 
-    #Audio Capture 
+    # Audio Capture 
     audio_capture_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
             os.path.join(
@@ -154,47 +81,16 @@ def generate_launch_description():
                 'launch/capture.launch.xml'))
     )
 
-    #Enviro capture 
-    enviro_capture_launch = IncludeLaunchDescription(
-        AnyLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('bme280_serial_ros2'),
-                'bme280.launch.xml'))
-    )
-
-
-    # Record data to ros2 bag 
-    #record_all_topics_action = ExecuteProcess(
-    #        cmd=[
-    #            'ros2',
-    #            'bag',
-    #            'record',
-    #            event_topic,
-    #            lidar_topic, 
-    #            '-o', bag_name],
-    #        output='screen'
-    #)
 
     # Add Nodes
-    ld.add_action(boson_capture_launch)
-    ld.add_action(lepton_capture_launch)
-    #ld.add_action(lidar_capture_launch)
-    ld.add_action(event_capture_launch)
-<<<<<<< HEAD
+
+    ld.add_action(realsense_capture_launch)
     ld.add_action(audio_capture_launch)
-    ld.add_action(enviro_capture_launch)
+    ld.add_action(event_capture_launch)
+    ld.add_action(lidar_capture_launch)
     ld.add_action(ximea_capture_launch)
-    ld.add_action(realsense_capture_launch)
-=======
-    ld.add_action(event_render_launch)
-    #ld.add_action(audio_capture_launch)
-    #ld.add_action(enviro_capture_launch)
-    #ld.add_action(ximea_capture_launch)
-    ld.add_action(realsense_capture_launch)
-    #ld.add_action(audio_play_launch)
-    ld.add_action(rqt_gui)
+    ld.add_action(boson_capture_launch)
+    ld.add_action(radar_capture_launch)
 
-
->>>>>>> b3687c2c2eb3a03ee34021929af8f4cf0cceb447
 
     return ld
