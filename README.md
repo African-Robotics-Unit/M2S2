@@ -61,12 +61,22 @@ Add the following line into your `.bashrc` to run all nodes using eCAL middlewar
 export RMW_IMPLEMENTATION=rmw_ecal_dynamic_cpp
 ```
 
-## Build 
-
-
 ## Usage
+The launch files in this repo can be used to launch all the sensors used in M2S2 simultaneously and visualise (and hear) the output streams. 
 
+clone this repo to your ros2 workspace source directory:
 
+$ cd ~/ros2_ws
+$ git clone https://github.com/African-Robotics-Unit/flir_boson_ROS2_driver.git
+$ cd ~/ros2_ws/flir_boson_ROS2_driver
+$ colcon build --packages-select flir_boson_ros2 flir_boson_interfaces
+
+$ ros2 launch flir_boson_ros2 flir_boson.launch.xml
+
+# To view the stream
+$ ros2 run rqt_image_view rqt_image_view
+
+Note: For usage instructions of specific drivers, please refer to the corresponding README file. 
 
 ## Deserialise Data 
 Using the eCAL RMW, one can record data using their powerful [recording](https://eclipse-ecal.github.io/ecal/getting_started/recorder.html) tool. All data is stored as an ecal_measurement in .hdf5 files. 
