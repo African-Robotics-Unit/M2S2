@@ -3,8 +3,14 @@
 # M2S2 - Multi Modal Sensor SUite 
 
 ## Description 
-This repo contains [ROS2](https://docs.ros.org/en/foxy/index.html) drivers for various sensors to collect raw timestamped RGB Camera, Radar, Thermal, Event, LiDAR, Audio, IMU, Temperature, Humidity and Pressure measurements. 
 
+![m2s2_system](docs/resources/Fig2_m2s2.jpg)
+
+This repo contains [ROS2](https://docs.ros.org/en/foxy/index.html) drivers for various sensors to collect raw, synchronized, high-speed RGB video, stereoscopic depth video, mmWave radar, thermal, event, LiDAR and audio measurements. 
+
+This repo also contains all mechanical designs used, as well as extrinsic calibration dara and procedures used. 
+
+In addition, we present the first M2S2 dataset containing wild cheetah behaviour.
 
 <hr/>
 
