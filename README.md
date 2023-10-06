@@ -68,7 +68,7 @@ clone this repo to your ros2 workspace source directory:
 
 ```bash
 $ cd ~/ros2_ws
-$ git clone 
+$ git clone https://github.com/African-Robotics-Unit/M2S2.git
 $ cd ~/ros2_ws/M2S2
 $ colcon build --packages-select m2s2_bringup
 
