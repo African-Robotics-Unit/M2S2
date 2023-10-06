@@ -1,6 +1,6 @@
 ![logo](docs/resources/ARU_logo_rectangle.png)
 
-# M2S2 - Multi Modal Sensor SUite 
+# M2S2 - Multi Modal Sensor Suite 
 
 ## Description 
 
