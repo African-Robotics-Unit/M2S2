@@ -69,8 +69,34 @@ export RMW_IMPLEMENTATION=rmw_ecal_dynamic_cpp
 
 
 ## Deserialise Data 
-Using the eCAL RMW, one can record data using their powerful[recording](https://eclipse-ecal.github.io/ecal/getting_started/recorder.html) tool. All data is stored as an ecal_measurement in .hdf5 files. 
+Using the eCAL RMW, one can record data using their powerful [recording](https://eclipse-ecal.github.io/ecal/getting_started/recorder.html) tool. All data is stored as an ecal_measurement in .hdf5 files. 
 
 Our [m2s2_ecal_deserializers](m2s2_ecal_deserializers) provides deserializers to convert raw M2S2 measurements into readable data.  
 
+## Calibration
+The Intel Realsense RGB camera was used as the reference (global) frame for all extrinsic calibration between M2S2 sensors.
 
+### Thermal Camera 
+To perform extrinsic calibration between the Intel RealSense and FLIR Boson 640, we propose a calibration target made of a laser-cut checkerboard pattern overlayed onto an aluminum covered surface. The checkerboard is then heated using two halogen lamps. This creates distinct features in the calibration target and the board is visible in both the RGB and IR camera. 
+
+Given the different resolutions of the thermal images (640 x 512) and the reference images from the Intel RealSense (1080 x 720), we used the MATLAB community [Calibration-Under Different-Resolution toolbox](https://github.com/balcilar/Calibration-Under_Different-Resolution). This toolboox modifies Matlab’s calibration app to accept cameras of different resolutions.
+
+### LiDAR
+Matlab's [Lidar Camera Calibrator](https://www.mathworks.com/help/lidar/ref/lidarcameracalibrator-app.html) app was used to perform geometric calibration between the Livox Avia and the Intel RealSense. 
+
+### Event Camera
+We used the open-source toolbox [E2Calib](https://github.com/uzh-rpg/e2calib) to perform event-camera calibration. The toolbox reconstructs visible images from event data using [E2VID](https://github.com/uzh-rpg/rpg_e2vid). The reconstructed images were then used in Matlab's [Stereo Camera calibrator app](https://www.mathworks.com/help/vision/ref/stereocameracalibrator-app.html) to perform extrinsic calibration between the event camera and the reference Intel RealSense.
+
+### mmWave Radar
+NIC ADD SOMETHING SHORT HERE 
+
+### Ximea High-speed Camera
+Matlab's [Stereo Camera calibrator app](https://www.mathworks.com/help/vision/ref/stereocameracalibrator-app.html) was used to perform extrinsic calibration between the Ximea and Intel RealSense.
+
+All calibration data used can be found here: <somelink>
+
+## Mecahnical Design
+Download our CAD design for our casing and 3D designs for our various sensor mounts here: <somelink>
+
+## Data
+Download our dataset in .hdf5 format here: <somelink>
