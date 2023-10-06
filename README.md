@@ -105,10 +105,10 @@ NIC ADD SOMETHING SHORT HERE
 ### Ximea High-speed Camera
 Matlab's [Stereo Camera calibrator app](https://www.mathworks.com/help/vision/ref/stereocameracalibrator-app.html) was used to perform extrinsic calibration between the Ximea and Intel RealSense.
 
-All calibration data used can be found here: <somelink>
+All calibration data used can be found here: [M2S2 Calibration Data](<somelink>)
 
 ## Mecahnical Design
-Download our CAD design for our casing and 3D designs for our various sensor mounts here: <somelink>
+Download our CAD design for our casing and 3D designs for our various sensor mounts here: [M2S2 CAD](<somelink>)
 
 ## Data
-Download our dataset in .hdf5 format here: <somelink>
+Download our dataset in .hdf5 format here: [M2S2 Dataset](<somelink>)
