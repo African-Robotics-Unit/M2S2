@@ -100,7 +100,7 @@ Matlab's [Lidar Camera Calibrator](https://www.mathworks.com/help/lidar/ref/lida
 We used the open-source toolbox [E2Calib](https://github.com/uzh-rpg/e2calib) to perform event-camera calibration. The toolbox reconstructs visible images from event data using [E2VID](https://github.com/uzh-rpg/rpg_e2vid). The reconstructed images were then used in Matlab's [Stereo Camera calibrator app](https://www.mathworks.com/help/vision/ref/stereocameracalibrator-app.html) to perform extrinsic calibration between the event camera and the reference Intel RealSense.
 
 ### mmWave Radar
-NIC ADD SOMETHING SHORT HERE 
+A moving corner reflector target was tracked in the realsense and radar FOV. Using the camera intrinsics, the azimuth and depth of the corner reflector was determined and compared to the output of the radar's range azimuth process. The Range-Azimuth CFAR matrix was rolled (shifted and wrapped) in range and azimuth to minimize the error between the two outputs over time. 
 
 ### Ximea High-speed Camera
 Matlab's [Stereo Camera calibrator app](https://www.mathworks.com/help/vision/ref/stereocameracalibrator-app.html) was used to perform extrinsic calibration between the Ximea and Intel RealSense.
