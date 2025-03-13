@@ -107,7 +107,7 @@ Matlab's [Stereo Camera calibrator app](https://www.mathworks.com/help/vision/re
 
 All calibration data used can be found here: [M2S2 Calibration Data](https://figshare.com/s/33329abe34ee0341fa63)
 
-## Mecahnical Design
+## Mechanical Design
 Download our CAD design for our casing and 3D designs for our various sensor mounts here: [M2S2 CAD](https://figshare.com/s/2d6dfffe6badf6c55cb4)
 
 ## Data
